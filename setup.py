@@ -9,7 +9,10 @@
 import io
 import os
 import re
+import sys
 
+if sys.version_info < (3, 4):
+    raise RuntimeError("pyserial-asyncio requires at least Python 3.4")
 
 from setuptools import setup
 
