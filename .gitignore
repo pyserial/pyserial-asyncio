@@ -1,0 +1,11 @@
+**/__pycache__
+*.pyc
+*.pyo
+documentation/_build
+build
+dist
+*.egg-info
+
+/MANIFEST
+
+.idea
