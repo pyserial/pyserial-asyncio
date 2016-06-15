@@ -1,9 +1,9 @@
-# setup.py for pySerial
+# setup.py for pySerial-asyncio
 #
 # For Python 3.x use the corresponding Python executable,
 # e.g. "python3 setup.py ..."
 #
-# (C) 2001-2016 Chris Liechti <cliechti@gmx.net>
+# (C) 2015-2016 Chris Liechti <cliechti@gmx.net>
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 import io
@@ -57,7 +57,7 @@ setup(
     url="https://github.com/pyserial/pyserial",
     packages=['serial', 'serial.aio'],
     install_requires=[
-          'pyserial',
+        'pyserial',
     ],
     license="BSD",
     long_description="""\
@@ -74,7 +74,8 @@ Latest:
 - Project Homepage: https://github.com/pyserial/pyserial
 """,
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        #~ 'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: BSD License',
