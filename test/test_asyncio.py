@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# This file is part of pySerial-asyncio - Cross platform serial_asyncio port support for Python
+# This file is part of pySerial-asyncio - Cross platform seria port support for Python
 # (C) 2016 Chris Liechti <cliechti@gmx.net>
 #
 # SPDX-License-Identifier:    BSD-3-Clause
@@ -30,7 +30,7 @@ class Test_asyncio(unittest.TestCase):
 
     def setUp(self):
         self.loop = asyncio.get_event_loop()
-        # create a closed serial_asyncio port
+        # create a closed serial port
 
     def tearDown(self):
         self.loop.close()
