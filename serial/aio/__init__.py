@@ -2,8 +2,8 @@
 #
 # Experimental implementation of asyncio support.
 #
-# This file is part of pySerial. https://github.com/pyserial/pyserial
-# (C) 2015 Chris Liechti <cliechti@gmx.net>
+# This file is part of pySerial. https://github.com/pyserial/pyserial-asyncio
+# (C) 2015-2016 Chris Liechti <cliechti@gmx.net>
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
@@ -18,7 +18,7 @@ import asyncio
 import serial
 
 
-__version__ = '3.1.1'
+__version__ = '0.1'
 
 
 class SerialTransport(asyncio.Transport):
