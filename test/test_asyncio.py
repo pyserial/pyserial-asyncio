@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# This file is part of pySerial-asyncio - Cross platform seria port support for Python
+# This file is part of pySerial-asyncio - Cross platform serial port support for Python
 # (C) 2016 Chris Liechti <cliechti@gmx.net>
 #
 # SPDX-License-Identifier:    BSD-3-Clause

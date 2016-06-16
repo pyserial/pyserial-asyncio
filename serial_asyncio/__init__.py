@@ -15,7 +15,6 @@ Windows event loops can not wait for serial ports with the current
 implementation. It should be possible to get that working though.
 """
 import asyncio
-
 import serial
 
 
@@ -23,7 +22,7 @@ __version__ = '0.1'
 
 
 class SerialTransport(asyncio.Transport):
-    """An asyncio transport model of a serial_asyncio communication channel.
+    """An asyncio transport model of a serial communication channel.
 
     A transport class is an abstraction of a communication channel.
     This allows protocol implementations to be developed against the
