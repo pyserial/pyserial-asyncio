@@ -1,0 +1,12 @@
+# (C) 2016 Chris Liechti <cliechti@gmx.net>
+# SPDX-License-Identifier:    BSD-3-Clause
+
+language: python
+
+python:
+  - 3.4
+  - 3.5
+
+script:
+  - python setup.py install
+  - python test/test_asyncio.py loop://
