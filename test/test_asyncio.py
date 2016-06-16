@@ -6,17 +6,23 @@
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
 Test asyncio related functionality.
+
+To run from the command line with a specific port with a loop-back,
+device connected, use:
+
+  $ cd pyserial-asyncio
+  $ python -m test.test_asyncio /dev/cu.usbserial-A103LR1R
+
 """
 
 import os
 import unittest
+import asyncio
+
 import pyserial_asyncio
 
 # on which port should the tests be performed:
 PORT = '/dev/ttyUSB0'
-
-import asyncio
-import pyserial_asyncio.aio
 
 @unittest.skipIf(os.name != 'posix', "asyncio not supported on platform")
 class Test_asyncio(unittest.TestCase):
@@ -59,7 +65,7 @@ class Test_asyncio(unittest.TestCase):
                 actions.append('resume')
                 print(self.transport.get_write_buffer_size())
 
-        coro = pyserial_asyncio.aio.create_serial_connection(self.loop, Output, PORT, baudrate=115200)
+        coro = pyserial_asyncio.create_serial_connection(self.loop, Output, PORT, baudrate=115200)
         self.loop.run_until_complete(coro)
         self.loop.run_forever()
         self.assertEqual(b''.join(received), TEXT)
