@@ -15,7 +15,8 @@ Windows event loops can not wait for pyserial_asyncio ports with the current
 implementation. It should be possible to get that working though.
 """
 import asyncio
-import pyserial_asyncio
+
+import serial
 
 
 __version__ = '0.1'
@@ -87,7 +88,7 @@ class SerialTransport(asyncio.Transport):
     def _read_ready(self):
         try:
             data = self._serial.read(self._max_read_size)
-        except pyserial_asyncio.SerialException as e:
+        except serial.SerialException as e:
             self._close(exc=e)
         else:
             if data:
@@ -106,7 +107,7 @@ class SerialTransport(asyncio.Transport):
             # Attempt to send it right away first
             try:
                 n = self._serial.write(data)
-            except pyserial_asyncio.SerialException as exc:
+            except serial.SerialException as exc:
                 self._fatal_error(exc, 'Fatal write error on pyserial_asyncio transport')
                 return
             if n == len(data):
@@ -237,7 +238,7 @@ class SerialTransport(asyncio.Transport):
             n = self._serial.write(data)
         except (BlockingIOError, InterruptedError):
             self._write_buffer.append(data)
-        except pyserial_asyncio.SerialException as exc:
+        except serial.SerialException as exc:
             self._fatal_error(exc, 'Fatal write error on pyserial_asyncio transport')
         else:
             if n == len(data):
@@ -358,7 +359,7 @@ class SerialTransport(asyncio.Transport):
 
 @asyncio.coroutine
 def create_serial_connection(loop, protocol_factory, *args, **kwargs):
-    ser = pyserial_asyncio.serial_for_url(*args, **kwargs)
+    ser = serial.serial_for_url(*args, **kwargs)
     protocol = protocol_factory()
     transport = SerialTransport(loop, protocol, ser)
     return (transport, protocol)
