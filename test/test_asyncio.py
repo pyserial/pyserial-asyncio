@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# This file is part of pySerial-asyncio - Cross platform serial port support for Python
+# This file is part of pySerial-asyncio - Cross platform pyserial_asyncio port support for Python
 # (C) 2016 Chris Liechti <cliechti@gmx.net>
 #
 # SPDX-License-Identifier:    BSD-3-Clause
@@ -10,13 +10,13 @@ Test asyncio related functionality.
 
 import os
 import unittest
-import serial
+import pyserial_asyncio
 
 # on which port should the tests be performed:
 PORT = '/dev/ttyUSB0'
 
 import asyncio
-import serial.aio
+import pyserial_asyncio.aio
 
 @unittest.skipIf(os.name != 'posix', "asyncio not supported on platform")
 class Test_asyncio(unittest.TestCase):
@@ -24,7 +24,7 @@ class Test_asyncio(unittest.TestCase):
 
     def setUp(self):
         self.loop = asyncio.get_event_loop()
-        # create a closed serial port
+        # create a closed pyserial_asyncio port
 
     def tearDown(self):
         self.loop.close()
@@ -59,7 +59,7 @@ class Test_asyncio(unittest.TestCase):
                 actions.append('resume')
                 print(self.transport.get_write_buffer_size())
 
-        coro = serial.aio.create_serial_connection(self.loop, Output, PORT, baudrate=115200)
+        coro = pyserial_asyncio.aio.create_serial_connection(self.loop, Output, PORT, baudrate=115200)
         self.loop.run_until_complete(coro)
         self.loop.run_forever()
         self.assertEqual(b''.join(received), TEXT)

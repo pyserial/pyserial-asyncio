@@ -45,7 +45,7 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-version = find_version('serial', 'aio', '__init__.py')
+version = find_version('pyserial_asyncio', 'aio', '__init__.py')
 
 
 setup(
@@ -55,7 +55,7 @@ setup(
     author="Chris Liechti",
     author_email="cliechti@gmx.net",
     url="https://github.com/pyserial/pyserial",
-    packages=['serial', 'serial.aio'],
+    packages=['pyserial_asyncio', 'pyserial_asyncio.aio'],
     install_requires=[
         'pyserial',
     ],

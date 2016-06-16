@@ -3,6 +3,6 @@
 
 from pkgutil import extend_path
 
-# serial is a namespace package
+# pyserial_asyncio is a namespace package
 __path__ = extend_path(__path__, __name__)
 

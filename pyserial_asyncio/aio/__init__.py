@@ -7,28 +7,28 @@
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
-Support asyncio with serial ports. EXPERIMENTAL
+Support asyncio with pyserial_asyncio ports. EXPERIMENTAL
 
 Posix platforms only, Python 3.4+ only.
 
-Windows event loops can not wait for serial ports with the current
+Windows event loops can not wait for pyserial_asyncio ports with the current
 implementation. It should be possible to get that working though.
 """
 import asyncio
-import serial
+import pyserial_asyncio
 
 
 __version__ = '0.1'
 
 
 class SerialTransport(asyncio.Transport):
-    """An asyncio transport model of a serial communication channel.
+    """An asyncio transport model of a pyserial_asyncio communication channel.
 
     A transport class is an abstraction of a communication channel.
     This allows protocol implementations to be developed against the
     transport abstraction without needing to know the details of the
     underlying channel, such as whether it is a pipe, a socket, or
-    indeed a serial port.
+    indeed a pyserial_asyncio port.
 
 
     You generally won’t instantiate a transport yourself; instead, you
@@ -66,7 +66,7 @@ class SerialTransport(asyncio.Transport):
         return self._serial
 
     def __repr__(self):
-        return '{self.__class__.__name__}({self._loop}, {self._protocol}, {self.serial})'.format(self=self)
+        return '{self.__class__.__name__}({self._loop}, {self._protocol}, {self.pyserial_asyncio})'.format(self=self)
 
     def is_closing(self):
         """Return True if the transport is closing or closed."""
@@ -87,7 +87,7 @@ class SerialTransport(asyncio.Transport):
     def _read_ready(self):
         try:
             data = self._serial.read(self._max_read_size)
-        except serial.SerialException as e:
+        except pyserial_asyncio.SerialException as e:
             self._close(exc=e)
         else:
             if data:
@@ -106,8 +106,8 @@ class SerialTransport(asyncio.Transport):
             # Attempt to send it right away first
             try:
                 n = self._serial.write(data)
-            except serial.SerialException as exc:
-                self._fatal_error(exc, 'Fatal write error on serial transport')
+            except pyserial_asyncio.SerialException as exc:
+                self._fatal_error(exc, 'Fatal write error on pyserial_asyncio transport')
                 return
             if n == len(data):
                 return  # Whole request satisfied
@@ -220,7 +220,7 @@ class SerialTransport(asyncio.Transport):
 
         This method is called back asynchronously as a writer
         registered with the asyncio event-loop against the
-        underlying file descriptor for the serial port.
+        underlying file descriptor for the pyserial_asyncio port.
 
         Should the write-buffer become empty if this method
         is invoked while the transport is closing, the protocol's
@@ -237,8 +237,8 @@ class SerialTransport(asyncio.Transport):
             n = self._serial.write(data)
         except (BlockingIOError, InterruptedError):
             self._write_buffer.append(data)
-        except serial.SerialException as exc:
-            self._fatal_error(exc, 'Fatal write error on serial transport')
+        except pyserial_asyncio.SerialException as exc:
+            self._fatal_error(exc, 'Fatal write error on pyserial_asyncio transport')
         else:
             if n == len(data):
                 assert self._flushed()
@@ -290,7 +290,7 @@ class SerialTransport(asyncio.Transport):
         self._high_water = high
         self._low_water = low
 
-    def _fatal_error(self, exc, message='Fatal error on serial transport'):
+    def _fatal_error(self, exc, message='Fatal error on pyserial_asyncio transport'):
         """Report a fatal error to the event-loop and abort the transport."""
         self._loop.call_exception_handler({
             'message': message,
@@ -340,7 +340,7 @@ class SerialTransport(asyncio.Transport):
         """Close the connection.
 
         Informs the protocol through connection_lost() and clears
-        pending buffers and closes the serial connection.
+        pending buffers and closes the pyserial_asyncio connection.
         """
         assert self._closing
         assert not self._has_writer
@@ -358,7 +358,7 @@ class SerialTransport(asyncio.Transport):
 
 @asyncio.coroutine
 def create_serial_connection(loop, protocol_factory, *args, **kwargs):
-    ser = serial.serial_for_url(*args, **kwargs)
+    ser = pyserial_asyncio.serial_for_url(*args, **kwargs)
     protocol = protocol_factory()
     transport = SerialTransport(loop, protocol, ser)
     return (transport, protocol)
