@@ -11,7 +11,7 @@ Support asyncio with pyserial_asyncio ports. EXPERIMENTAL
 
 Posix platforms only, Python 3.4+ only.
 
-Windows event loops can not wait for pyserial_asyncio ports with the current
+Windows event loops can not wait for serial ports with the current
 implementation. It should be possible to get that working though.
 """
 import asyncio
