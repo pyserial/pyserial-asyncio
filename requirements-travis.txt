@@ -1,0 +1,7 @@
+# Depend on the head of pyserial
+git+https://github.com/pyserial/pyserial.git#egg=pyserial
+
+# OR
+
+# Depend on a specific pyserial commit
+# git+https://github.com/pyserial/pyserial.git@000b14389171a9f0d7d713466b32bc649b0bed8e#egg=pyserial
