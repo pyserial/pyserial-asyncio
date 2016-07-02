@@ -3,6 +3,13 @@
 Welcome to pySerial-asyncio's documentation
 ===========================================
 
+`Async I/O`_ extension for the `Python Serial Port`_ package for OSX, Linux, BSD
+
+It depends on pySerial and is compatible with Python 3.4 and later.
+
+.. _`Async I/O`: https://www.python.org/dev/peps/pep-3156/
+.. _`Python Serial Port`: https://pypi.python.org/pypi/pyserial
+
 
 Other pages (online)
 
@@ -12,7 +19,7 @@ Other pages (online)
   http://pythonhosted.org/pyserial-asyncio/ .
 
 .. _Python: http://python.org/
-.. _`project page on GitHub`: https://github.com/pyserial-asyncio/
+.. _`project page on GitHub`: https://github.com/pyserial/pyserial-asyncio/
 .. _`Download Page`: http://pypi.python.org/pypi/pyserial-asyncio
 
 
