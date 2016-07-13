@@ -15,6 +15,8 @@ Windows event loops can not wait for serial ports with the current
 implementation. It should be possible to get that working though.
 """
 import asyncio
+import os
+
 import serial
 import termios
 
@@ -259,25 +261,59 @@ class SerialTransport(asyncio.Transport):
             self._maybe_resume_protocol()
             assert self._has_writer
 
-    def _ensure_reader(self):
-        if (not self._has_reader) and (not self._closing):
-            self._loop.add_reader(self._serial.fd, self._read_ready)
-            self._has_reader = True
+    if os.name == "nt":
+        def _poll_read(self):
+            if self._has_reader:
+                if self.serial.in_waiting:
+                    self._loop.call_soon(self._read_ready)
+                self._loop.call_later(.0005, self._poll_read)
 
-    def _remove_reader(self):
-        if self._has_reader:
-            self._loop.remove_reader(self._serial.fd)
-            self._has_reader = False
+        def _ensure_reader(self):
+            if (not self._has_reader) and (not self._closing):
+                self._loop.call_later(.0005, self._poll_read)
+                self._has_reader = True
 
-    def _ensure_writer(self):
-        if (not self._has_writer) and (not self._closing):
-            self._loop.add_writer(self._serial.fd, self._write_ready)
-            self._has_writer = True
+        def _remove_reader(self):
+            if self._has_reader:
+                self._has_reader = False
 
-    def _remove_writer(self):
-        if self._has_writer:
-            self._loop.remove_writer(self._serial.fd)
-            self._has_writer = False
+        def _poll_write(self):
+            if self._has_writer:
+                if self.serial.out_waiting:
+                    self._loop.call_soon(self._write_ready)
+                self._loop.call_later(.0005, self._poll_write)
+
+        def _ensure_writer(self):
+            if (not self._has_writer) and (not self._closing):
+                self._loop.call_later(.0005, self._poll_write)
+                self._has_writer = True
+
+        def _remove_writer(self):
+            if self._has_writer:
+                self._loop.remove_writer(self._serial.fd)
+                self._has_writer = False
+
+
+    else:
+        def _ensure_reader(self):
+            if (not self._has_reader) and (not self._closing):
+                self._loop.add_reader(self._serial.fd, self._read_ready)
+                self._has_reader = True
+
+        def _remove_reader(self):
+            if self._has_reader:
+                self._loop.remove_reader(self._serial.fd)
+                self._has_reader = False
+
+        def _ensure_writer(self):
+            if (not self._has_writer) and (not self._closing):
+                self._loop.add_writer(self._serial.fd, self._write_ready)
+                self._has_writer = True
+
+        def _remove_writer(self):
+            if self._has_writer:
+                self._loop.remove_writer(self._serial.fd)
+                self._has_writer = False
 
     def _set_write_buffer_limits(self, high=None, low=None):
         """Ensure consistent write-buffer limits."""
