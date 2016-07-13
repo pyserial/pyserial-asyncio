@@ -15,9 +15,14 @@ Windows event loops can not wait for serial ports with the current
 implementation. It should be possible to get that working though.
 """
 import asyncio
-import serial
-import termios
+import os
 
+import serial
+
+try:
+    import termios
+except ImportError:
+    termios = None
 
 __version__ = '0.1'
 
@@ -50,6 +55,7 @@ class SerialTransport(asyncio.Transport):
         self._set_write_buffer_limits()
         self._has_reader = False
         self._has_writer = False
+        self._poll_wait_time = 0.0005
 
         # XXX how to support url handlers too
 
@@ -103,19 +109,21 @@ class SerialTransport(asyncio.Transport):
         if self._closing:
             return
 
-        if self.get_write_buffer_size() == 0:
+        if self.get_write_buffer_size() == 0 and (os.name == "nt" or self._serial.out_waiting == 0):
             # Attempt to send it right away first
             try:
                 n = self._serial.write(data)
+                if os.name == "nt":     # work around https://github.com/pyserial/pyserial/issues/162
+                    n = len(data)
             except serial.SerialException as exc:
                 self._fatal_error(exc, 'Fatal write error on serial transport')
                 return
             if n == len(data):
                 return  # Whole request satisfied
-            assert n > 0
+            assert n >= 0 < len(data)
             data = data[n:]
-            self._ensure_writer()
 
+        self._ensure_writer()
         self._write_buffer.append(data)
         self._maybe_pause_protocol()
 
@@ -236,6 +244,8 @@ class SerialTransport(asyncio.Transport):
 
         try:
             n = self._serial.write(data)
+            if os.name == "nt":     # work around https://github.com/pyserial/pyserial/issues/162
+                n = len(data)
         except (BlockingIOError, InterruptedError):
             self._write_buffer.append(data)
         except serial.SerialException as exc:
@@ -253,31 +263,63 @@ class SerialTransport(asyncio.Transport):
                     self._close()
                 return
 
-            assert n > 0
+            assert n >= 0 < len(data)
             data = data[n:]
             self._write_buffer.append(data)  # Try again later
             self._maybe_resume_protocol()
             assert self._has_writer
 
-    def _ensure_reader(self):
-        if (not self._has_reader) and (not self._closing):
-            self._loop.add_reader(self._serial.fd, self._read_ready)
-            self._has_reader = True
+    if os.name == "nt":
+        def _poll_read(self):
+            if self._has_reader:
+                if self.serial.in_waiting:
+                    self._loop.call_soon(self._read_ready)
+                self._loop.call_later(self._poll_wait_time, self._poll_read)
 
-    def _remove_reader(self):
-        if self._has_reader:
-            self._loop.remove_reader(self._serial.fd)
-            self._has_reader = False
+        def _ensure_reader(self):
+            if (not self._has_reader) and (not self._closing):
+                self._loop.call_later(self._poll_wait_time, self._poll_read)
+                self._has_reader = True
 
-    def _ensure_writer(self):
-        if (not self._has_writer) and (not self._closing):
-            self._loop.add_writer(self._serial.fd, self._write_ready)
-            self._has_writer = True
+        def _remove_reader(self):
+            if self._has_reader:
+                self._has_reader = False
 
-    def _remove_writer(self):
-        if self._has_writer:
-            self._loop.remove_writer(self._serial.fd)
-            self._has_writer = False
+        def _poll_write(self):
+            if self._has_writer:
+                if self.serial.out_waiting == 0:
+                    self._loop.call_soon(self._write_ready)
+                self._loop.call_later(self._poll_wait_time, self._poll_write)
+
+        def _ensure_writer(self):
+            if (not self._has_writer) and (not self._closing):
+                self._loop.call_later(self._poll_wait_time, self._poll_write)
+                self._has_writer = True
+
+        def _remove_writer(self):
+            if self._has_writer:
+                self._has_writer = False
+
+    else:
+        def _ensure_reader(self):
+            if (not self._has_reader) and (not self._closing):
+                self._loop.add_reader(self._serial.fd, self._read_ready)
+                self._has_reader = True
+
+        def _remove_reader(self):
+            if self._has_reader:
+                self._loop.remove_reader(self._serial.fd)
+                self._has_reader = False
+
+        def _ensure_writer(self):
+            if (not self._has_writer) and (not self._closing):
+                self._loop.add_writer(self._serial.fd, self._write_ready)
+                self._has_writer = True
+
+        def _remove_writer(self):
+            if self._has_writer:
+                self._loop.remove_writer(self._serial.fd)
+                self._has_writer = False
 
     def _set_write_buffer_limits(self, high=None, low=None):
         """Ensure consistent write-buffer limits."""
@@ -346,12 +388,15 @@ class SerialTransport(asyncio.Transport):
         assert self._closing
         assert not self._has_writer
         assert not self._has_reader
-        try:
+        if os.name == "nt":
             self._serial.flush()
-        except termios.error:
-            # ignore termios errors which may happen if the serial device was
-            # hot-unplugged.
-            pass
+        else:
+            try:
+                self._serial.flush()
+            except termios.error:
+                # ignore termios errors which may happen if the serial device was
+                # hot-unplugged.
+                pass
         try:
             self._protocol.connection_lost(exc)
         finally:
