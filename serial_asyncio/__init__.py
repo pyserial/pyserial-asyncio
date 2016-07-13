@@ -18,8 +18,11 @@ import asyncio
 import os
 
 import serial
-import termios
 
+try:
+    import termios
+except ImportError:
+    termios = None
 
 __version__ = '0.1'
 
@@ -293,7 +296,6 @@ class SerialTransport(asyncio.Transport):
                 self._loop.remove_writer(self._serial.fd)
                 self._has_writer = False
 
-
     else:
         def _ensure_reader(self):
             if (not self._has_reader) and (not self._closing):
@@ -382,12 +384,15 @@ class SerialTransport(asyncio.Transport):
         assert self._closing
         assert not self._has_writer
         assert not self._has_reader
-        try:
+        if os.name == "nt":
             self._serial.flush()
-        except termios.error:
-            # ignore termios errors which may happen if the serial device was
-            # hot-unplugged.
-            pass
+        else:
+            try:
+                self._serial.flush()
+            except termios.error:
+                # ignore termios errors which may happen if the serial device was
+                # hot-unplugged.
+                pass
         try:
             self._protocol.connection_lost(exc)
         finally:
