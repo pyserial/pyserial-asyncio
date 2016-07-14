@@ -55,6 +55,7 @@ class SerialTransport(asyncio.Transport):
         self._set_write_buffer_limits()
         self._has_reader = False
         self._has_writer = False
+        self._poll_wait_time = 0.0005
 
         # XXX how to support url handlers too
 
@@ -269,11 +270,11 @@ class SerialTransport(asyncio.Transport):
             if self._has_reader:
                 if self.serial.in_waiting:
                     self._loop.call_soon(self._read_ready)
-                self._loop.call_later(.0005, self._poll_read)
+                self._loop.call_later(self._poll_wait_time, self._poll_read)
 
         def _ensure_reader(self):
             if (not self._has_reader) and (not self._closing):
-                self._loop.call_later(.0005, self._poll_read)
+                self._loop.call_later(self._poll_wait_time, self._poll_read)
                 self._has_reader = True
 
         def _remove_reader(self):
@@ -284,11 +285,11 @@ class SerialTransport(asyncio.Transport):
             if self._has_writer:
                 if self.serial.out_waiting:
                     self._loop.call_soon(self._write_ready)
-                self._loop.call_later(.0005, self._poll_write)
+                self._loop.call_later(self._poll_wait_time, self._poll_write)
 
         def _ensure_writer(self):
             if (not self._has_writer) and (not self._closing):
-                self._loop.call_later(.0005, self._poll_write)
+                self._loop.call_later(self._poll_wait_time, self._poll_write)
                 self._has_writer = True
 
         def _remove_writer(self):
