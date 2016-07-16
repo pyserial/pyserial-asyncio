@@ -1,6 +1,11 @@
 # (C) 2016 Chris Liechti <cliechti@gmx.net>
 # SPDX-License-Identifier:    BSD-3-Clause
 
+addons:
+  apt:
+    packages:
+    - socat
+
 language: python
 
 python:
