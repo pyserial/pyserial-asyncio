@@ -3,7 +3,7 @@
 # Experimental implementation of asyncio support.
 #
 # This file is part of pySerial. https://github.com/pyserial/pyserial-asyncio
-# (C) 2015-2016 Chris Liechti <cliechti@gmx.net>
+# (C) 2015-2016 pySerial-team
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\

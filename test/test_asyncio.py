@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # This file is part of pySerial-asyncio - Cross platform serial port support for Python
-# (C) 2016 Chris Liechti <cliechti@gmx.net>
+# (C) 2016 pySerial-team
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
@@ -11,7 +11,7 @@ To run from the command line with a specific port with a loop-back,
 device connected, use:
 
   $ cd pyserial-asyncio
-  $ python -m test.test_asyncio /dev/cu.usbserial-A103LR1R
+  $ python -m test.test_asyncio SERIALDEVICE
 
 """
 

@@ -52,9 +52,8 @@ setup(
     name="pyserial-asyncio",
     description="Python Serial Port Extension - Asynchronous I/O support",
     version=version,
-    author="Chris Liechti",
-    author_email="cliechti@gmx.net",
-    url="https://github.com/pyserial/pyserial",
+    author="pySerial-team",
+    url="https://github.com/pyserial/pyserial-asyncio",
     packages=['serial_asyncio'],
     install_requires=[
         'pyserial',
@@ -63,15 +62,8 @@ setup(
     long_description="""\
 Async I/O extension package for the Python Serial Port Extension for OSX, Linux, BSD
 
-Stable:
-
-- Documentation: http://pythonhosted.org/pyserial/
-- Download Page: https://pypi.python.org/pypi/pyserial
-
-Latest:
-
-- Documentation: http://pyserial.readthedocs.io/en/latest/
-- Project Homepage: https://github.com/pyserial/pyserial
+- Documentation: http://pyserial-asyncio.readthedocs.io
+- Project Homepage: https://github.com/pyserial/pyserial-asyncio
 """,
     classifiers=[
         #~ 'Development Status :: 5 - Production/Stable',

@@ -4,7 +4,7 @@
 
 License
 =======
-Copyright (c) 2015-2016 Chris Liechti <cliechti@gmx.net>
+Copyright (c) 2015-2016 pySerial-team (see CREDITS.rst)
 All Rights Reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -38,7 +38,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pySerial-asyncio'
-copyright = u'2015-2016, Chris Liechti'
+copyright = u'2015-2016, pySerial-team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -173,7 +173,7 @@ html_static_path = ['_static']
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'pySerial-asyncio.tex', u'pySerial-asyncio Documentation',
-   u'Chris Liechti', 'manual'),
+   u'pySerial-team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
