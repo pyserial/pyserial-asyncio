@@ -43,4 +43,4 @@ Ownership
 
 .. _CREDITS.rst: CREDITS.rst
 .. _issue: https://github.com/pyserial/pyserial-asyncio/issues
-.. _wellcome: https://github.com/pyserial/pyserial-asyncio/pulls
+.. _welcome: https://github.com/pyserial/pyserial-asyncio/pulls
