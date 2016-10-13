@@ -9,14 +9,8 @@ It depends on pySerial and is compatible with Python 3.4 and later.
 Documentation
 =============
 
-Stable:
-
-- Documentation: http://pythonhosted.org/pyserial-asyncio/
-- Download Page: https://pypi.python.org/pypi/pyserial-asyncio
-
-Latest:
-
 - Documentation: http://pyserial-asyncio.readthedocs.io/en/latest/
+- Download Page: https://pypi.python.org/pypi/pyserial-asyncio
 - Project Homepage: https://github.com/pyserial/pyserial-asyncio
 
 

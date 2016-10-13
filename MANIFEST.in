@@ -5,10 +5,10 @@ include MANIFEST.in
 include requirements.txt
 include setup.cfg
 
-include *.rst
-include conf.py
-include Makefile
-include pyserial-asyncio.png
+include documentation/*.rst
+include documentation/conf.py
+include documentation/Makefile
+include documentation/pyserial-asyncio.png
 
 include test/__init__.py
 include test/test_asyncio.py
