@@ -3,7 +3,7 @@
 # Experimental implementation of asyncio support.
 #
 # This file is part of pySerial. https://github.com/pyserial/pyserial-asyncio
-# (C) 2015-2016 Chris Liechti <cliechti@gmx.net>
+# (C) 2015-2016 pySerial-team
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
@@ -24,7 +24,7 @@ try:
 except ImportError:
     termios = None
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 
 class SerialTransport(asyncio.Transport):
@@ -287,7 +287,7 @@ class SerialTransport(asyncio.Transport):
 
         def _poll_write(self):
             if self._has_writer:
-                if self.serial.out_waiting == 0:
+                if self.serial.out_waiting:
                     self._loop.call_soon(self._write_ready)
                 self._loop.call_later(self._poll_wait_time, self._poll_write)
 
@@ -298,6 +298,7 @@ class SerialTransport(asyncio.Transport):
 
         def _remove_writer(self):
             if self._has_writer:
+                self._loop.remove_writer(self._serial.fd)
                 self._has_writer = False
 
     else:
