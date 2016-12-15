@@ -151,7 +151,7 @@ class SerialTransport(asyncio.Transport):
     def set_write_buffer_limits(self, high=None, low=None):
         """Set the high- and low-water limits for write flow control.
 
-        These two values control when call the protocol’s
+        These two values control when the protocol’s
         pause_writing()and resume_writing() methods are called. If
         specified, the low-water limit must be less than or equal to
         the high-water limit. Neither high nor low can be negative.
