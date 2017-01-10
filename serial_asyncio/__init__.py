@@ -109,10 +109,12 @@ class SerialTransport(asyncio.Transport):
         if self._closing:
             return
 
-        if self.get_write_buffer_size() == 0:
+        if self.get_write_buffer_size() == 0 and (os.name == "nt" or self._serial.out_waiting == 0):
             # Attempt to send it right away first
             try:
                 n = self._serial.write(data)
+                if os.name == "nt":     # work around https://github.com/pyserial/pyserial/issues/162
+                    n = len(data)
             except serial.SerialException as exc:
                 self._fatal_error(exc, 'Fatal write error on serial transport')
                 return
@@ -120,8 +122,8 @@ class SerialTransport(asyncio.Transport):
                 return  # Whole request satisfied
             assert n >= 0 < len(data)
             data = data[n:]
-            self._ensure_writer()
 
+        self._ensure_writer()
         self._write_buffer.append(data)
         self._maybe_pause_protocol()
 
@@ -242,6 +244,8 @@ class SerialTransport(asyncio.Transport):
 
         try:
             n = self._serial.write(data)
+            if os.name == "nt":     # work around https://github.com/pyserial/pyserial/issues/162
+                n = len(data)
         except (BlockingIOError, InterruptedError):
             self._write_buffer.append(data)
         except serial.SerialException as exc:
