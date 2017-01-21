@@ -15,6 +15,7 @@ Contributors
 - David Ko
 - Nicolas Di Pietro
 - jabdoa2
+- Chris Seymour
 - ... not all names may be listed here, see also ``git log`` or online history_
 
 
