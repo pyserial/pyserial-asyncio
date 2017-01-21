@@ -21,8 +21,12 @@ import asyncio
 
 import serial_asyncio
 
+HOST = '127.0.0.1'
+_PORT = 8888
+
 # on which port should the tests be performed:
-PORT = '/dev/ttyUSB0'
+PORT = 'socket://%s:%s' % (HOST, _PORT)
+
 
 @unittest.skipIf(os.name != 'posix', "asyncio not supported on platform")
 class Test_asyncio(unittest.TestCase):
@@ -40,15 +44,20 @@ class Test_asyncio(unittest.TestCase):
         received = []
         actions = []
 
+        class Input(asyncio.Protocol):
+            def connection_made(self, transport):
+                self.transport = transport
+
+            def data_received(self, data):
+                self.transport.write(data)
+
         class Output(asyncio.Protocol):
             def connection_made(self, transport):
                 self.transport = transport
                 actions.append('open')
-                transport.serial.rts = False
                 transport.write(TEXT)
 
             def data_received(self, data):
-                #~ print('data received', repr(data))
                 received.append(data)
                 if b'\n' in data:
                     self.transport.close()
@@ -65,8 +74,12 @@ class Test_asyncio(unittest.TestCase):
                 actions.append('resume')
                 print(self.transport.get_write_buffer_size())
 
-        coro = serial_asyncio.create_serial_connection(self.loop, Output, PORT, baudrate=115200)
-        self.loop.run_until_complete(coro)
+        if '://' in PORT:
+            coro = self.loop.create_server(Input, HOST, _PORT)
+            self.loop.run_until_complete(coro)
+
+        client = serial_asyncio.create_serial_connection(self.loop, Output, PORT, baudrate=115200)
+        self.loop.run_until_complete(client)
         self.loop.run_forever()
         self.assertEqual(b''.join(received), TEXT)
         self.assertEqual(actions, ['open', 'close'])
