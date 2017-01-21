@@ -78,7 +78,7 @@ class Test_asyncio(unittest.TestCase):
             coro = self.loop.create_server(Input, HOST, _PORT)
             self.loop.run_until_complete(coro)
 
-        client = serial_asyncio.create_serial_connection(self.loop, Output, PORT, baudrate=115200)
+        client = serial_asyncio.create_serial_connection(self.loop, Output, PORT)
         self.loop.run_until_complete(client)
         self.loop.run_forever()
         self.assertEqual(b''.join(received), TEXT)
