@@ -12,4 +12,4 @@ install:
   - pip install -e .
 
 script:
-  - python test/test_asyncio.py loop://
+  - python test/test_asyncio.py
