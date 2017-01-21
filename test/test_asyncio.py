@@ -74,7 +74,7 @@ class Test_asyncio(unittest.TestCase):
                 actions.append('resume')
                 print(self.transport.get_write_buffer_size())
 
-        if '://' in PORT:
+        if PORT.startswith('socket://'):
             coro = self.loop.create_server(Input, HOST, _PORT)
             self.loop.run_until_complete(coro)
 
