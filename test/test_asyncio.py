@@ -40,39 +40,49 @@ class Test_asyncio(unittest.TestCase):
         self.loop.close()
 
     def test_asyncio(self):
-        TEXT = b'hello world\n'
+        TEXT = b'Hello, World!\n'
         received = []
         actions = []
 
         class Input(asyncio.Protocol):
+
+            def __init__(self):
+                super().__init__()
+                self._transport = None
+
             def connection_made(self, transport):
-                self.transport = transport
+                self._transport = transport
 
             def data_received(self, data):
-                self.transport.write(data)
+                self._transport.write(data)
 
         class Output(asyncio.Protocol):
+
+            def __init__(self):
+                super().__init__()
+                self._transport = None
+
             def connection_made(self, transport):
-                self.transport = transport
+                self._transport = transport
                 actions.append('open')
                 transport.write(TEXT)
 
             def data_received(self, data):
                 received.append(data)
                 if b'\n' in data:
-                    self.transport.close()
+                    self._transport.close()
 
             def connection_lost(self, exc):
                 actions.append('close')
-                asyncio.get_event_loop().stop()
+                self._transport.loop.stop()
 
             def pause_writing(self):
                 actions.append('pause')
-                print(self.transport.get_write_buffer_size())
+                print(self._transport.get_write_buffer_size())
 
             def resume_writing(self):
                 actions.append('resume')
-                print(self.transport.get_write_buffer_size())
+                print(self._transport.get_write_buffer_size())
 
         if PORT.startswith('socket://'):
             coro = self.loop.create_server(Input, HOST, _PORT)

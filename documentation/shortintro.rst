@@ -1,6 +1,6 @@
-====================
- Short introduction
-====================
+==================
+Short introduction
+==================
 
 Example::
 
@@ -18,7 +18,7 @@ Example::
 
         def connection_lost(self, exc):
             print('port closed')
-            asyncio.get_event_loop().stop()
+            self.transport.loop.stop()
 
         def pause_writing(self):
             print('pause writing')
@@ -33,3 +33,4 @@ Example::
     loop.run_until_complete(coro)
     loop.run_forever()
     loop.close()
+

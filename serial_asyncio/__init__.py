@@ -68,12 +68,17 @@ class SerialTransport(asyncio.Transport):
         loop.call_soon(self._ensure_reader)
 
     @property
+    def loop(self):
+        """The asyncio event loop used by this SerialTransport."""
+        return self._loop
+
+    @property
     def serial(self):
         """The underlying Serial instance."""
         return self._serial
 
     def __repr__(self):
-        return '{self.__class__.__name__}({self._loop}, {self._protocol}, {self.serial})'.format(self=self)
+        return '{self.__class__.__name__}({self.loop}, {self._protocol}, {self.serial})'.format(self=self)
 
     def is_closing(self):
         """Return True if the transport is closing or closed."""
@@ -446,27 +451,32 @@ def open_serial_connection(*,
 # test
 if __name__ == '__main__':
     class Output(asyncio.Protocol):
+
+        def __init__(self):
+            super().__init__()
+            self._transport = None
+
         def connection_made(self, transport):
-            self.transport = transport
-            print('port opened', transport)
-            transport.serial.rts = False
-            transport.write(b'hello world\n')
+            self._transport = transport
+            print('port opened', self._transport)
+            self._transport.serial.rts = False
+            self._transport.write(b'Hello, World!\n')
 
         def data_received(self, data):
             print('data received', repr(data))
             if b'\n' in data:
-                self.transport.close()
+                self._transport.close()
 
         def connection_lost(self, exc):
             print('port closed')
-            asyncio.get_event_loop().stop()
+            self._transport.loop.stop()
 
         def pause_writing(self):
             print('pause writing')
-            print(self.transport.get_write_buffer_size())
+            print(self._transport.get_write_buffer_size())
 
         def resume_writing(self):
-            print(self.transport.get_write_buffer_size())
+            print(self._transport.get_write_buffer_size())
             print('resume writing')
 
     loop = asyncio.get_event_loop()
