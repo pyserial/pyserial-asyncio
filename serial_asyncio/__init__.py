@@ -123,7 +123,7 @@ class SerialTransport(asyncio.Transport):
                 return
             if n == len(data):
                 return  # Whole request satisfied
-            assert n >= 0 < len(data)
+            assert 0 <= n < len(data)
             data = data[n:]
             self._ensure_writer()
 
@@ -264,7 +264,7 @@ class SerialTransport(asyncio.Transport):
                     self._close()
                 return
 
-            assert n >= 0 < len(data)
+            assert 0 <= n < len(data)
             data = data[n:]
             self._write_buffer.append(data)  # Try again later
             self._maybe_resume_protocol()
