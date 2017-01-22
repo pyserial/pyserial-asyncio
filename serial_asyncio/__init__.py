@@ -282,8 +282,7 @@ class SerialTransport(asyncio.Transport):
                 self._has_reader = True
 
         def _remove_reader(self):
-            if self._has_reader:
-                self._has_reader = False
+            self._has_reader = False
 
         def _poll_write(self):
             if self._has_writer:
@@ -297,9 +296,7 @@ class SerialTransport(asyncio.Transport):
                 self._has_writer = True
 
         def _remove_writer(self):
-            if self._has_writer:
-                self._loop.remove_writer(self._serial.fileno())
-                self._has_writer = False
+            self._has_writer = False
 
     else:
         def _ensure_reader(self):
