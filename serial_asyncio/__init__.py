@@ -294,28 +294,28 @@ class SerialTransport(asyncio.Transport):
 
         def _remove_writer(self):
             if self._has_writer:
-                self._loop.remove_writer(self._serial.fd)
+                self._loop.remove_writer(self._serial.fileno())
                 self._has_writer = False
 
     else:
         def _ensure_reader(self):
             if (not self._has_reader) and (not self._closing):
-                self._loop.add_reader(self._serial.fd, self._read_ready)
+                self._loop.add_reader(self._serial.fileno(), self._read_ready)
                 self._has_reader = True
 
         def _remove_reader(self):
             if self._has_reader:
-                self._loop.remove_reader(self._serial.fd)
+                self._loop.remove_reader(self._serial.fileno())
                 self._has_reader = False
 
         def _ensure_writer(self):
             if (not self._has_writer) and (not self._closing):
-                self._loop.add_writer(self._serial.fd, self._write_ready)
+                self._loop.add_writer(self._serial.fileno(), self._write_ready)
                 self._has_writer = True
 
         def _remove_writer(self):
             if self._has_writer:
-                self._loop.remove_writer(self._serial.fd)
+                self._loop.remove_writer(self._serial.fileno())
                 self._has_writer = False
 
     def _set_write_buffer_limits(self, high=None, low=None):
