@@ -240,7 +240,6 @@ class SerialTransport(asyncio.Transport):
         argument.
         """
         data = b''.join(self._write_buffer)
-        num_bytes = len(data)
         assert data, 'Write buffer should not be empty'
 
         self._write_buffer.clear()
