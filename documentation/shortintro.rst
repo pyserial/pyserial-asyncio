@@ -8,8 +8,8 @@ Example::
         def connection_made(self, transport):
             self.transport = transport
             print('port opened', transport)
-            transport.serial.rts = False
-            transport.write(b'hello world\n')
+            transport.serial.rts = False  # You can manipulate Serial object via transport
+            transport.write(b'Hello, World!\n')  # Write serial data via transport
 
         def data_received(self, data):
             print('data received', repr(data))
