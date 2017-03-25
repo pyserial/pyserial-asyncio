@@ -3,7 +3,7 @@
 # Experimental implementation of asyncio support.
 #
 # This file is part of pySerial. https://github.com/pyserial/pyserial-asyncio
-# (C) 2015-2016 pySerial-team
+# (C) 2015-2017 pySerial-team
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
@@ -24,7 +24,7 @@ try:
 except ImportError:
     termios = None
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 
 class SerialTransport(asyncio.Transport):
