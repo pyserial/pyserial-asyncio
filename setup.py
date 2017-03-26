@@ -3,7 +3,7 @@
 # For Python 3.x use the corresponding Python executable,
 # e.g. "python3 setup.py ..."
 #
-# (C) 2015-2016 Chris Liechti <cliechti@gmx.net>
+# (C) 2015-2017 Chris Liechti <cliechti@gmx.net>
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 import io
@@ -78,6 +78,8 @@ Async I/O extension package for the Python Serial Port Extension for OSX, Linux,
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Communications',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
