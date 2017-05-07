@@ -5,13 +5,13 @@
 asyncio
 =======
 
-.. module:: serial.aio
+.. module:: serial_asyncio
 
 .. warning:: This implementation is currently in an experimental state. Use
     at your own risk.
 
 Experimental asyncio support is available for Python 3.4 and newer. The module
-:mod:`serial.aio` provides a :class:`asyncio.Transport`:
+:mod:`serial_asyncio` provides a :class:`asyncio.Transport`:
 ``SerialTransport``.
 
 
@@ -45,7 +45,7 @@ Example::
             asyncio.get_event_loop().stop()
 
     loop = asyncio.get_event_loop()
-    coro = serial.aio.create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
+    coro = serial_asyncio.create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
     loop.run_until_complete(coro)
     loop.run_forever()
     loop.close()

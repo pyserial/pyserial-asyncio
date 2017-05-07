@@ -4,6 +4,9 @@ Short introduction
 
 Example::
 
+    import asyncio
+    import serial_asyncio
+
     class Output(asyncio.Protocol):
         def connection_made(self, transport):
             self.transport = transport
@@ -29,7 +32,7 @@ Example::
             print('resume writing')
 
     loop = asyncio.get_event_loop()
-    coro = create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
+    coro = serial_asyncio.create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
     loop.run_until_complete(coro)
     loop.run_forever()
     loop.close()
