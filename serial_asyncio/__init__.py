@@ -118,6 +118,8 @@ class SerialTransport(asyncio.Transport):
             # Attempt to send it right away first
             try:
                 n = self._serial.write(data)
+            except (BlockingIOError, InterruptedError):
+                n = 0
             except serial.SerialException as exc:
                 self._fatal_error(exc, 'Fatal write error on serial transport')
                 return
