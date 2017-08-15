@@ -417,7 +417,7 @@ def create_serial_connection(loop, protocol_factory, *args, **kwargs):
 
 
 @asyncio.coroutine
-def open_serial_connection(*args,
+def open_serial_connection(*,
                            loop=None,
                            limit=asyncio.streams._DEFAULT_LIMIT,
                            **kwargs):
@@ -439,9 +439,8 @@ def open_serial_connection(*args,
     reader = asyncio.StreamReader(limit=limit, loop=loop)
     protocol = asyncio.StreamReaderProtocol(reader, loop=loop)
     transport, _ = yield from create_serial_connection(
-        loop,
-        lambda: protocol,
-        *args,
+        loop=loop,
+        protocol_factory=lambda: protocol,
         **kwargs)
     writer = asyncio.StreamWriter(transport, protocol, reader, loop)
     return reader, writer
@@ -450,58 +449,37 @@ def open_serial_connection(*args,
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # test
 if __name__ == '__main__':
-    def _test_create_serial_connection():
-        class Output(asyncio.Protocol):
+    class Output(asyncio.Protocol):
 
-            def __init__(self):
-                super().__init__()
-                self._transport = None
+        def __init__(self):
+            super().__init__()
+            self._transport = None
 
-            def connection_made(self, transport):
-                self._transport = transport
-                print('port opened', self._transport)
-                self._transport.serial.rts = False
-                self._transport.write(b'Hello, World!\n')
+        def connection_made(self, transport):
+            self._transport = transport
+            print('port opened', self._transport)
+            self._transport.serial.rts = False
+            self._transport.write(b'Hello, World!\n')
 
-            def data_received(self, data):
-                print('data received', repr(data))
-                if b'\n' in data:
-                    self._transport.close()
+        def data_received(self, data):
+            print('data received', repr(data))
+            if b'\n' in data:
+                self._transport.close()
 
-            def connection_lost(self, exc):
-                print('port closed')
-                self._transport.loop.stop()
+        def connection_lost(self, exc):
+            print('port closed')
+            self._transport.loop.stop()
 
-            def pause_writing(self):
-                print('pause writing')
-                print(self._transport.get_write_buffer_size())
+        def pause_writing(self):
+            print('pause writing')
+            print(self._transport.get_write_buffer_size())
 
-            def resume_writing(self):
-                print(self._transport.get_write_buffer_size())
-                print('resume writing')
+        def resume_writing(self):
+            print(self._transport.get_write_buffer_size())
+            print('resume writing')
 
-        loop = asyncio.get_event_loop()
-        coro = create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
-        loop.run_until_complete(coro)
-        loop.run_forever()
-        loop.close()
-
-    #
-    # Functions to test the open_serial_connection function
-    #
-    @asyncio.coroutine
-    def _process_stream(port, loop, baudrate):
-        reader, writer = yield from open_serial_connection(port, loop=loop, baudrate=baudrate)
-        # Wait to receive a line
-        data = yield from reader.readuntil(b"\n")
-        print(r'Line received: "{0}"'.format(data))
-        loop.stop()     # In this test, we just read one line
-
-    def _test_open_serial_connection():
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(_process_stream('/dev/cu.usbmodem1d21', loop, baudrate=115200))
-        loop.close()
-
-    # _test_create_serial_connection()
-    _test_open_serial_connection()
-
+    loop = asyncio.get_event_loop()
+    coro = create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
+    loop.run_until_complete(coro)
+    loop.run_forever()
+    loop.close()
