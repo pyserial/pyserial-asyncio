@@ -29,6 +29,10 @@ A factory function (`asyncio.coroutine`) is provided:
 
 Example::
 
+    import asyncio
+    import serial_asyncio
+    
+    
     class Output(asyncio.Protocol):
         def connection_made(self, transport):
             self.transport = transport
