@@ -275,9 +275,12 @@ class SerialTransport(asyncio.Transport):
     if os.name == "nt":
         def _poll_read(self):
             if self._has_reader:
-                if self.serial.in_waiting:
-                    self._loop.call_soon(self._read_ready)
-                self._loop.call_later(self._poll_wait_time, self._poll_read)
+                try:
+                    if self.serial.in_waiting:
+                        self._loop.call_soon(self._read_ready)
+                    self._loop.call_later(self._poll_wait_time, self._poll_read)
+                except serial.SerialException as exc:
+                    self._fatal_error(exc, 'Fatal write error on serial transport')
 
         def _ensure_reader(self):
             if (not self._has_reader) and (not self._closing):
@@ -389,15 +392,12 @@ class SerialTransport(asyncio.Transport):
         assert self._closing
         assert not self._has_writer
         assert not self._has_reader
-        if os.name == "nt":
+        try:
             self._serial.flush()
-        else:
-            try:
-                self._serial.flush()
-            except termios.error:
-                # ignore termios errors which may happen if the serial device was
-                # hot-unplugged.
-                pass
+        except (serial.SerialException if os.name == "nt" else termios.error):
+            # ignore serial errors which may happen if the serial device was
+            # hot-unplugged.
+            pass
         try:
             self._protocol.connection_lost(exc)
         finally:
