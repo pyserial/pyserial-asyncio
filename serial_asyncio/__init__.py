@@ -4,16 +4,13 @@
 # Experimental implementation of asyncio support.
 #
 # This file is part of pySerial. https://github.com/pyserial/pyserial-asyncio
-# (C) 2015-2017 pySerial-team
+# (C) 2015-2019 pySerial-team
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
 Support asyncio with serial ports. EXPERIMENTAL
 
-Posix platforms only, Python 3.4+ only.
-
-Windows event loops can not wait for serial ports with the current
-implementation. It should be possible to get that working though.
+Python 3.4+ only.
 """
 import asyncio
 import os
@@ -25,7 +22,7 @@ try:
 except ImportError:
     termios = None
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 
 class SerialTransport(asyncio.Transport):
@@ -46,6 +43,7 @@ class SerialTransport(asyncio.Transport):
 
     def __init__(self, loop, protocol, serial_instance):
         super().__init__()
+
         self._loop = loop
         self._protocol = protocol
         self._serial = serial_instance
@@ -57,6 +55,8 @@ class SerialTransport(asyncio.Transport):
         self._has_reader = False
         self._has_writer = False
         self._poll_wait_time = 0.0005
+        self._closed_event = asyncio.Event(loop=loop)
+        self._opened_event = asyncio.Event(loop=loop)
 
         # XXX how to support url handlers too
 
@@ -188,6 +188,19 @@ class SerialTransport(asyncio.Transport):
         """
         self._abort(None)
 
+    def set_protocol(self, new_protocol):
+        """Switch the protocol to a new protocol."""
+        old_protocol = self._protocol
+        if old_protocol is not None:
+            old_protocol.connection_lost()
+
+        self._protocol = new_protocol
+        if new_protocol is not None:
+            new_protocol.connection_made(self)
+
+    def get_protocol(self):
+        return self._protocol
+
     def _maybe_pause_protocol(self):
         """To be called whenever the write-buffer size increases.
 
@@ -203,10 +216,10 @@ class SerialTransport(asyncio.Transport):
                 self._protocol.pause_writing()
             except Exception as exc:
                 self._loop.call_exception_handler({
-                    'message': 'protocol.pause_writing() failed',
+                    'message':   'protocol.pause_writing() failed',
                     'exception': exc,
                     'transport': self,
-                    'protocol': self._protocol,
+                    'protocol':  self._protocol,
                 })
 
     def _maybe_resume_protocol(self):
@@ -224,10 +237,10 @@ class SerialTransport(asyncio.Transport):
                 self._protocol.resume_writing()
             except Exception as exc:
                 self._loop.call_exception_handler({
-                    'message': 'protocol.resume_writing() failed',
+                    'message':   'protocol.resume_writing() failed',
                     'exception': exc,
                     'transport': self,
-                    'protocol': self._protocol,
+                    'protocol':  self._protocol,
                 })
 
     def _write_ready(self):
@@ -286,6 +299,7 @@ class SerialTransport(asyncio.Transport):
             if (not self._has_reader) and (not self._closing):
                 self._loop.call_later(self._poll_wait_time, self._poll_read)
                 self._has_reader = True
+                self._opened_event.set()
 
         def _remove_reader(self):
             self._has_reader = False
@@ -309,6 +323,7 @@ class SerialTransport(asyncio.Transport):
             if (not self._has_reader) and (not self._closing):
                 self._loop.add_reader(self._serial.fileno(), self._read_ready)
                 self._has_reader = True
+                self._opened_event.set()
 
         def _remove_reader(self):
             if self._has_reader:
@@ -340,10 +355,10 @@ class SerialTransport(asyncio.Transport):
     def _fatal_error(self, exc, message='Fatal error on serial transport'):
         """Report a fatal error to the event-loop and abort the transport."""
         self._loop.call_exception_handler({
-            'message': message,
+            'message':   message,
             'exception': exc,
             'transport': self,
-            'protocol': self._protocol,
+            'protocol':  self._protocol,
         })
         self._abort(exc)
 
@@ -403,16 +418,32 @@ class SerialTransport(asyncio.Transport):
         finally:
             self._write_buffer.clear()
             self._serial.close()
+            self._closed_event.set()
             self._serial = None
             self._protocol = None
             self._loop = None
 
+    @asyncio.coroutine
+    def wait_opened(self):
+        """Wait until the underlying device has been opened and we are ready for write calls.
+        If the device has already been opened, this will resolve immediately.
+        """
+        yield from self._opened_event.wait()
+
+    @asyncio.coroutine
+    def wait_closed(self):
+        """Wait until the underlying device has been closed and is free to be reopened
+        in this or another process. If the device has already been closed, this will resolve immediately.
+        """
+        yield from self._closed_event.wait()
+
 
 @asyncio.coroutine
-def create_serial_connection(loop, protocol_factory, *args, **kwargs):
+def create_serial_connection(protocol_factory, *args, loop=None, **kwargs):
     ser = serial.serial_for_url(*args, **kwargs)
     protocol = protocol_factory()
     transport = SerialTransport(loop, protocol, ser)
+    yield from transport.wait_opened()
     return (transport, protocol)
 
 
@@ -443,9 +474,10 @@ def open_serial_connection(*,
         protocol_factory=lambda: protocol,
         **kwargs)
     writer = asyncio.StreamWriter(transport, protocol, reader, loop)
-    return reader, writer
+    return (reader, writer)
 
 
+__all__ = ['SerialTransport', 'open_serial_connection', 'create_serial_connection']
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # test
 if __name__ == '__main__':
@@ -477,6 +509,7 @@ if __name__ == '__main__':
         def resume_writing(self):
             print(self._transport.get_write_buffer_size())
             print('resume writing')
+
 
     loop = asyncio.get_event_loop()
     coro = create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
