@@ -79,7 +79,7 @@ class SerialTransport(asyncio.Transport):
         return self._serial
 
     def __repr__(self):
-        return '{self.__class__.__name__}({self.loop}, {self._protocol}, {self.serial})'.format(self=self)
+        return f'{self.__class__.__name__}({self.loop}, {self._protocol}, {self.serial})'
 
     def is_closing(self):
         """Return True if the transport is closing or closed."""
