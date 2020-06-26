@@ -116,21 +116,11 @@ class SerialTransport(asyncio.Transport):
             return
 
         if self.get_write_buffer_size() == 0:
-            # Attempt to send it right away first
-            try:
-                n = self._serial.write(data)
-            except (BlockingIOError, InterruptedError):
-                n = 0
-            except serial.SerialException as exc:
-                self._fatal_error(exc, 'Fatal write error on serial transport')
-                return
-            if n == len(data):
-                return  # Whole request satisfied
-            assert 0 <= n < len(data)
-            data = data[n:]
+            self._write_buffer.append(data)
             self._ensure_writer()
+        else:
+            self._write_buffer.append(data)
 
-        self._write_buffer.append(data)
         self._maybe_pause_protocol()
 
     def can_write_eof(self):
@@ -187,6 +177,13 @@ class SerialTransport(asyncio.Transport):
         connection_lost() method will eventually be called.
         """
         self._abort(None)
+
+    def flush(self):
+        """ clears output buffer and stops any more data being written
+        """
+        self._remove_writer()
+        self._write_buffer.clear()
+        self._maybe_resume_protocol()
 
     def _maybe_pause_protocol(self):
         """To be called whenever the write-buffer size increases.
