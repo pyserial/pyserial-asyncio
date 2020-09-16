@@ -11,8 +11,8 @@ import os
 import re
 import sys
 
-if sys.version_info < (3, 4):
-    raise RuntimeError("pyserial-asyncio requires at least Python 3.4")
+if sys.version_info < (3, 5):
+    raise RuntimeError("pyserial-asyncio requires at least Python 3.5")
 
 from setuptools import setup
 
@@ -76,10 +76,10 @@ Async I/O extension package for the Python Serial Port Extension for OSX, Linux,
         'Operating System :: MacOS :: MacOS X',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Communications',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
