@@ -4,7 +4,7 @@
 # Experimental implementation of asyncio support.
 #
 # This file is part of pySerial. https://github.com/pyserial/pyserial-asyncio
-# (C) 2015-2017 pySerial-team
+# (C) 2015-2020 pySerial-team
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
@@ -406,10 +406,61 @@ class SerialTransport(asyncio.Transport):
 
 
 async def create_serial_connection(loop, protocol_factory, *args, **kwargs):
-    ser = serial.serial_for_url(*args, **kwargs)
+    """Create a connection to a new serial port instance.
+
+    This function is a coroutine which will try to establish the
+    connection.
+
+    The chronological order of the operation is:
+
+    1. protocol_factory is called without arguments and must return
+       a protocol instance.
+
+    2. The protocol instance is tied to the transport
+
+    3. This coroutine returns successfully with a (transport,
+       protocol) pair.
+
+    4. The connection_made() method of the protocol
+       will be called at some point by the event loop.
+
+    Note:  protocol_factory can be any kind of callable, not
+    necessarily a class. For example, if you want to use a pre-created
+    protocol instance, you can pass lambda: my_protocol.
+
+    Any additional arguments will be forwarded to the Serial constructor.
+    """
+    serial_instance = serial.serial_for_url(*args, **kwargs)
+    transport, protocol = await connection_for_serial(loop, protocol_factory, serial_instance)
+    return transport, protocol
+
+
+async def connection_for_serial(loop, protocol_factory, serial_instance):
+    """Create a connection to the given serial port instance.
+
+    This function is a coroutine which will try to establish the
+    connection.
+
+    The chronological order of the operation is:
+
+    1. protocol_factory is called without arguments and must return
+       a protocol instance.
+
+    2. The protocol instance is tied to the transport
+
+    3. This coroutine returns successfully with a (transport,
+       protocol) pair.
+
+    4. The connection_made() method of the protocol
+       will be called at some point by the event loop.
+
+    Note:  protocol_factory can be any kind of callable, not
+    necessarily a class. For example, if you want to use a pre-created
+    protocol instance, you can pass lambda: my_protocol.
+    """
     protocol = protocol_factory()
-    transport = SerialTransport(loop, protocol, ser)
-    return (transport, protocol)
+    transport = SerialTransport(loop, protocol, serial_instance)
+    return transport, protocol
 
 
 async def open_serial_connection(*,
