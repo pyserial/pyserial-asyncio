@@ -4,7 +4,7 @@
 
 Async I/O extension package for the Python Serial Port Extension for OSX, Linux, BSD
 
-It depends on pySerial and is compatible with Python 3.4 and later.
+It depends on pySerial and is compatible with Python 3.5 and later.
 
 Documentation
 =============
