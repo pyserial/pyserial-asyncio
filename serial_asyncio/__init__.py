@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Experimental implementation of asyncio support.
+# Implementation of asyncio support.
 #
 # This file is part of pySerial. https://github.com/pyserial/pyserial-asyncio
 # (C) 2015-2020 pySerial-team
 #
 # SPDX-License-Identifier:    BSD-3-Clause
 """\
-Support asyncio with serial ports. EXPERIMENTAL
+Support asyncio with serial ports.
 
 Posix platforms only, Python 3.5+ only.
 
