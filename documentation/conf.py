@@ -22,7 +22,10 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.intersphinx']
+extensions = [
+    'sphinx.ext.intersphinx',
+    'sphinx_rtd_theme',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -38,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pySerial-asyncio'
-copyright = u'2015-2017, pySerial-team'
+copyright = u'2015-2020, pySerial-team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -81,7 +84,7 @@ exclude_trees = ['_build']
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+#pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -91,7 +94,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-#html_theme = 'default'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -195,6 +198,6 @@ latex_logo = 'pyserial-asyncio.png'
 
 # for external links to standard library
 intersphinx_mapping = {
-        #~ 'python': ('http://docs.python.org', None),
-        'py': ('http://docs.python.org', None),
-        }
+    'python': ('https://docs.python.org/3', None),
+    'pyserial': ('https://pyserial.readthedocs.io/en/latest', None),
+}

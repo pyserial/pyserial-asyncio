@@ -465,7 +465,7 @@ async def connection_for_serial(loop, protocol_factory, serial_instance):
 
 async def open_serial_connection(*,
                            loop=None,
-                           limit=asyncio.streams._DEFAULT_LIMIT,
+                           limit=None,
                            **kwargs):
     """A wrapper for create_serial_connection() returning a (reader,
     writer) pair.
@@ -482,6 +482,8 @@ async def open_serial_connection(*,
     """
     if loop is None:
         loop = asyncio.get_event_loop()
+    if limit is None:
+        limit = asyncio.streams._DEFAULT_LIMIT
     reader = asyncio.StreamReader(limit=limit, loop=loop)
     protocol = asyncio.StreamReaderProtocol(reader, loop=loop)
     transport, _ = await create_serial_connection(
@@ -526,6 +528,6 @@ if __name__ == '__main__':
 
     loop = asyncio.get_event_loop()
     coro = create_serial_connection(loop, Output, '/dev/ttyUSB0', baudrate=115200)
-    loop.run_until_complete(coro)
+    transport, protocol = loop.run_until_complete(coro)
     loop.run_forever()
     loop.close()
