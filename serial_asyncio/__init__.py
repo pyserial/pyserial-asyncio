@@ -75,8 +75,20 @@ class SerialTransport(asyncio.Transport):
 
     @property
     def serial(self):
-        """The underlying Serial instance."""
+        """The underlying Serial instance.
+
+        Equivalent to get_extra_info("serial")
+        """
         return self._serial
+
+    def get_extra_info(name, default=None):
+        """Get optional transport information.
+
+        Currently only "serial" is available.
+        """
+        if name == "serial":
+            return self._serial
+        return default
 
     def __repr__(self):
         return '{self.__class__.__name__}({self.loop}, {self._protocol}, {self.serial})'.format(self=self)
