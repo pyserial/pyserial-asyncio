@@ -81,7 +81,7 @@ class SerialTransport(asyncio.Transport):
         """
         return self._serial
 
-    def get_extra_info(name, default=None):
+    def get_extra_info(self, name, default=None):
         """Get optional transport information.
 
         Currently only "serial" is available.
