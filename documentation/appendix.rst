@@ -4,7 +4,7 @@
 
 License
 =======
-Copyright (c) 2015-2017 pySerial-team (see CREDITS.rst)
+Copyright (c) 2015-2020 pySerial-team (see CREDITS.rst)
 All Rights Reserved.
 
 Redistribution and use in source and binary forms, with or without
