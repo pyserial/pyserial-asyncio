@@ -57,6 +57,7 @@ class SerialTransport(asyncio.Transport):
         self._has_reader = False
         self._has_writer = False
         self._poll_wait_time = 0.0005
+        self._max_out_waiting = 1024
 
         # XXX how to support url handlers too
 
@@ -303,7 +304,7 @@ class SerialTransport(asyncio.Transport):
         def _poll_write(self):
             if self._has_writer and not self._closing:
                 self._has_writer = self._loop.call_later(self._poll_wait_time, self._poll_write)
-                if self.serial.out_waiting:
+                if self.serial.out_waiting < self._max_out_waiting:
                     self._write_ready()
 
         def _ensure_writer(self):
