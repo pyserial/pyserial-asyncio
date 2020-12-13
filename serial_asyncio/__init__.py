@@ -283,34 +283,36 @@ class SerialTransport(asyncio.Transport):
 
     if os.name == "nt":
         def _poll_read(self):
-            if self._has_reader:
+            if self._has_reader and not self._closing:
                 try:
+                    self._has_reader = self._loop.call_later(self._poll_wait_time, self._poll_read)
                     if self.serial.in_waiting:
-                        self._loop.call_soon(self._read_ready)
-                    self._loop.call_later(self._poll_wait_time, self._poll_read)
+                        self._read_ready()
                 except serial.SerialException as exc:
                     self._fatal_error(exc, 'Fatal write error on serial transport')
 
         def _ensure_reader(self):
-            if (not self._has_reader) and (not self._closing):
-                self._loop.call_later(self._poll_wait_time, self._poll_read)
-                self._has_reader = True
+            if not self._has_reader and not self._closing:
+                self._has_reader = self._loop.call_later(self._poll_wait_time, self._poll_read)
 
         def _remove_reader(self):
+            if self._has_reader:
+                self._has_reader.cancel()
             self._has_reader = False
 
         def _poll_write(self):
-            if self._has_writer:
+            if self._has_writer and not self._closing:
+                self._has_writer = self._loop.call_later(self._poll_wait_time, self._poll_write)
                 if self.serial.out_waiting:
-                    self._loop.call_soon(self._write_ready)
-                self._loop.call_later(self._poll_wait_time, self._poll_write)
+                    self._write_ready()
 
         def _ensure_writer(self):
-            if (not self._has_writer) and (not self._closing):
-                self._loop.call_later(self._poll_wait_time, self._poll_write)
-                self._has_writer = True
+            if not self._has_writer and not self._closing:
+                self._has_writer = self._loop.call_later(self._poll_wait_time, self._poll_write)
 
         def _remove_writer(self):
+            if self._has_writer:
+                self._has_writer.cancel()
             self._has_writer = False
 
     else:
