@@ -309,7 +309,7 @@ class SerialTransport(asyncio.Transport):
 
         def _ensure_writer(self):
             if not self._has_writer and not self._closing:
-                self._has_writer = self._loop.call_later(self._poll_wait_time, self._poll_write)
+                self._has_writer = self._loop.call_soon(self._poll_write)
 
         def _remove_writer(self):
             if self._has_writer:
