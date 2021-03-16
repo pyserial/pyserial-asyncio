@@ -117,8 +117,6 @@ This example will read chunks from the serial port every 300ms.
         def resume_reading(self):
             # This will start the callbacks to data_received again with all data that has been received in the meantime.
             self.transport.resume_reading()
-        
-        
     
     
     async def reader():
