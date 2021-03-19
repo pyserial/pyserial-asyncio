@@ -109,7 +109,7 @@ This example will read chunks from the serial port every 300ms.
             self.pause_reading()
         
         
-        def pause_writing(self):
+        def pause_reading(self):
             # This will stop the callbacks to data_received
             self.transport.pause_reading()
         
