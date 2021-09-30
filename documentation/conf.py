@@ -59,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'pySerial-asyncio'
-copyright = u'2015-2020, pySerial-team'
+copyright = u'2015-2021, pySerial-team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
