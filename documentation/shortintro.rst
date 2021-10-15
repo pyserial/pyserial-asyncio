@@ -90,7 +90,7 @@ port asynchronously::
 Reading data in chunks
 ----------------------
 
-This example will read chunks from the serial port every 300ms:
+This example will read chunks from the serial port every 300ms::
 
 
     import asyncio
