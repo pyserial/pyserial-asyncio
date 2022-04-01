@@ -43,6 +43,7 @@ class Test_asyncio(unittest.TestCase):
         TEXT = b'Hello, World!\n'
         received = []
         actions = []
+        done = asyncio.Event()
 
         class Input(asyncio.Protocol):
 
@@ -74,7 +75,7 @@ class Test_asyncio(unittest.TestCase):
 
             def connection_lost(self, exc):
                 actions.append('close')
-                self._transport.loop.stop()
+                done.set()
 
             def pause_writing(self):
                 actions.append('pause')
@@ -90,7 +91,9 @@ class Test_asyncio(unittest.TestCase):
 
         client = serial_asyncio.create_serial_connection(self.loop, Output, PORT)
         self.loop.run_until_complete(client)
-        self.loop.run_forever()
+        self.loop.run_until_complete(done.wait())
+        pending = asyncio.all_tasks(self.loop)
+        self.loop.run_until_complete(asyncio.gather(*pending))
         self.assertEqual(b''.join(received), TEXT)
         self.assertEqual(actions, ['open', 'close'])
 

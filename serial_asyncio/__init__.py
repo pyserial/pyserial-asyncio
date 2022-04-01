@@ -379,7 +379,7 @@ class SerialTransport(asyncio.Transport):
         self._remove_reader()
         if self._flushed():
             self._remove_writer()
-            self._loop.call_soon(self._call_connection_lost, exc)
+            self._loop.create_task(self._call_connection_lost(exc))
 
     def _abort(self, exc):
         """Close the transport immediately.
@@ -393,9 +393,9 @@ class SerialTransport(asyncio.Transport):
         self._closing = True
         self._remove_reader()
         self._remove_writer()  # Pending buffered data will not be written
-        self._loop.call_soon(self._call_connection_lost, exc)
+        self._loop.create_task(self._call_connection_lost(exc))
 
-    def _call_connection_lost(self, exc):
+    async def _call_connection_lost(self, exc):
         """Close the connection.
 
         Informs the protocol through connection_lost() and clears
@@ -405,16 +405,17 @@ class SerialTransport(asyncio.Transport):
         assert not self._has_writer
         assert not self._has_reader
         try:
-            self._serial.flush()
+            await self._loop.run_in_executor(None, self._serial.flush)
         except (serial.SerialException if os.name == "nt" else termios.error):
             # ignore serial errors which may happen if the serial device was
             # hot-unplugged.
             pass
+
         try:
             self._protocol.connection_lost(exc)
         finally:
             self._write_buffer.clear()
-            self._serial.close()
+            await self._loop.run_in_executor(None, self._serial.close)
             self._serial = None
             self._protocol = None
             self._loop = None
@@ -445,7 +446,7 @@ async def create_serial_connection(loop, protocol_factory, *args, **kwargs):
 
     Any additional arguments will be forwarded to the Serial constructor.
     """
-    serial_instance = serial.serial_for_url(*args, **kwargs)
+    serial_instance = await loop.run_in_executor(None, serial.serial_for_url, *args, **kwargs)
     transport, protocol = await connection_for_serial(loop, protocol_factory, serial_instance)
     return transport, protocol
 
