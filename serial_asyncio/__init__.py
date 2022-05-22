@@ -19,6 +19,7 @@ import asyncio
 import os
 
 import serial
+from functools import partial
 
 try:
     import termios
@@ -446,7 +447,8 @@ async def create_serial_connection(loop, protocol_factory, *args, **kwargs):
 
     Any additional arguments will be forwarded to the Serial constructor.
     """
-    serial_instance = await loop.run_in_executor(None, serial.serial_for_url, *args, **kwargs)
+    callback = partial(serial.serial_for_url, *args, **kwargs)
+    serial_instance = await loop.run_in_executor(None, callback)
     transport, protocol = await connection_for_serial(loop, protocol_factory, serial_instance)
     return transport, protocol
 
