@@ -17,6 +17,7 @@ implementation. It should be possible to get that working though.
 """
 import asyncio
 import os
+import urllib.parse
 
 import serial
 from functools import partial
@@ -422,7 +423,7 @@ class SerialTransport(asyncio.Transport):
             self._loop = None
 
 
-async def create_serial_connection(loop, protocol_factory, *args, **kwargs):
+async def create_serial_connection(loop, protocol_factory, url, *args, **kwargs):
     """Create a connection to a new serial port instance.
 
     This function is a coroutine which will try to establish the
@@ -447,9 +448,23 @@ async def create_serial_connection(loop, protocol_factory, *args, **kwargs):
 
     Any additional arguments will be forwarded to the Serial constructor.
     """
-    callback = partial(serial.serial_for_url, *args, **kwargs)
+    parsed_url = urllib.parse.urlparse(url)
+
+    callback = partial(serial.serial_for_url, url, *args, **kwargs)
     serial_instance = await loop.run_in_executor(None, callback)
-    transport, protocol = await connection_for_serial(loop, protocol_factory, serial_instance)
+
+    if parsed_url.scheme == "socket":
+        transport, protocol = await loop.create_connection(protocol_factory, parsed_url.hostname, parsed_url.port)
+
+        # To maintain API compatibility
+        transport.flush = lambda: None
+        transport.loop = loop
+        transport.serial = serial_instance
+        transport._extra["serial"] = serial_instance
+        serial_instance._socket = transport.get_extra_info("socket")._sock
+    else:
+        transport, protocol = await connection_for_serial(loop, protocol_factory, serial_instance)
+
     return transport, protocol
 
 
