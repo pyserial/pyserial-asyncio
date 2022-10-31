@@ -25,10 +25,14 @@ HOST = '127.0.0.1'
 _PORT = 8888
 
 # on which port should the tests be performed:
-PORT = 'socket://%s:%s' % (HOST, _PORT)
+if os.name == "nt":
+    # these ports can be created by com0com-2.2.2.0
+    PORT = "COM20"
+    PORT2 = "COM21"
+else:
+    PORT = 'socket://%s:%s' % (HOST, _PORT)
 
 
-@unittest.skipIf(os.name != 'posix', "asyncio not supported on platform")
 class Test_asyncio(unittest.TestCase):
     """Test asyncio related functionality"""
 
@@ -88,6 +92,9 @@ class Test_asyncio(unittest.TestCase):
         if PORT.startswith('socket://'):
             coro = self.loop.create_server(Input, HOST, _PORT)
             self.loop.run_until_complete(coro)
+        else:
+            coro = serial_asyncio.create_serial_connection(self.loop, Input, PORT2)
+            self.loop.run_until_complete(coro)
 
         client = serial_asyncio.create_serial_connection(self.loop, Output, PORT)
         self.loop.run_until_complete(client)
@@ -103,6 +110,8 @@ if __name__ == '__main__':
     sys.stdout.write(__doc__)
     if len(sys.argv) > 1:
         PORT = sys.argv[1]
+    if len(sys.argv) > 2:
+        PORT2 = sys.argv[2]
     sys.stdout.write("Testing port: %r\n" % PORT)
     sys.argv[1:] = ['-v']
     # When this module is executed from the command-line, it runs all its tests
