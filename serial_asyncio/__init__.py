@@ -397,6 +397,20 @@ class SerialTransport(asyncio.Transport):
         self._remove_writer()  # Pending buffered data will not be written
         self._loop.create_task(self._call_connection_lost(exc))
 
+    async def _try_to_run_in_executor(self, executor, func, *args):
+        """Runs `func` synchronously if the executor is stopped."""
+
+        try:
+            coro = self._loop.run_in_executor(executor, func, *args)
+        except RuntimeError:
+            # This error is seen only when the event loop is shutting down and the
+            # executor has already been shut down first. Since the cleanup methods are
+            # usually fast and the loop is stopping anyways, we have no choice but to
+            # run them synchronously.
+            return func(*args)
+        else:
+            return await coro
+
     async def _call_connection_lost(self, exc):
         """Close the connection.
 
@@ -407,7 +421,7 @@ class SerialTransport(asyncio.Transport):
         assert not self._has_writer
         assert not self._has_reader
         try:
-            await self._loop.run_in_executor(None, self._serial.flush)
+            await self._try_to_run_in_executor(None, self._serial.flush)
         except (serial.SerialException if os.name == "nt" else termios.error):
             # ignore serial errors which may happen if the serial device was
             # hot-unplugged.
@@ -417,7 +431,7 @@ class SerialTransport(asyncio.Transport):
             self._protocol.connection_lost(exc)
         finally:
             self._write_buffer.clear()
-            await self._loop.run_in_executor(None, self._serial.close)
+            await self._try_to_run_in_executor(None, self._serial.close)
             self._serial = None
             self._protocol = None
             self._loop = None
