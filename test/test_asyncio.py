@@ -15,7 +15,6 @@ device connected, use:
 
 """
 
-import os
 import unittest
 import asyncio
 
@@ -28,7 +27,6 @@ _PORT = 8888
 PORT = 'socket://%s:%s' % (HOST, _PORT)
 
 
-@unittest.skipIf(os.name != 'posix', "asyncio not supported on platform")
 class Test_asyncio(unittest.TestCase):
     """Test asyncio related functionality"""
 
