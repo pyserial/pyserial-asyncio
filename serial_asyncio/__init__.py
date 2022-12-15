@@ -94,7 +94,7 @@ class SerialTransport(asyncio.Transport):
         return default
 
     def __repr__(self):
-        return '{self.__class__.__name__}({self.loop}, {self._protocol}, {self.serial})'.format(self=self)
+        return '{self.__class__.__name__}({self.loop}, {self._protocol}, {self._serial})'.format(self=self)
 
     def is_closing(self):
         """Return True if the transport is closing or closed."""
@@ -289,7 +289,7 @@ class SerialTransport(asyncio.Transport):
             if self._has_reader and not self._closing:
                 try:
                     self._has_reader = self._loop.call_later(self._poll_wait_time, self._poll_read)
-                    if self.serial.in_waiting:
+                    if self._serial.in_waiting:
                         self._read_ready()
                 except serial.SerialException as exc:
                     self._fatal_error(exc, 'Fatal write error on serial transport')
@@ -306,7 +306,7 @@ class SerialTransport(asyncio.Transport):
         def _poll_write(self):
             if self._has_writer and not self._closing:
                 self._has_writer = self._loop.call_later(self._poll_wait_time, self._poll_write)
-                if self.serial.out_waiting < self._max_out_waiting:
+                if self._serial.out_waiting < self._max_out_waiting:
                     self._write_ready()
 
         def _ensure_writer(self):
