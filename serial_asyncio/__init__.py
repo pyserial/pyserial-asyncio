@@ -306,7 +306,9 @@ class SerialTransport(asyncio.Transport):
         def _poll_write(self):
             if self._has_writer and not self._closing:
                 self._has_writer = self._loop.call_later(self._poll_wait_time, self._poll_write)
-                if self.serial.out_waiting < self._max_out_waiting:
+                if not getattr(self.serial, "out_waiting", None):
+                    self._write_ready()
+                elif self.serial.out_waiting < self._max_out_waiting:
                     self._write_ready()
 
         def _ensure_writer(self):
