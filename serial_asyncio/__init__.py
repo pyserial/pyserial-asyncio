@@ -61,12 +61,18 @@ class SerialTransport(asyncio.Transport):
         self._poll_wait_time = 0.0005
         self._max_out_waiting = 1024
 
-        # XXX how to support url handlers too
+        try:
+            self._serial.fileno()
+            self._has_fileno = True
+        except:
+            self._has_fileno = False
 
         # Asynchronous I/O requires non-blocking devices
         self._serial.timeout = 0
-        if not self.serial.port.startswith("rfc2217"):
+        try:
             self._serial.write_timeout = 0
+        except:
+            pass # best effort, not supported by all Serial implementations
 
         # These two callbacks will be enqueued in a FIFO queue by asyncio
         loop.call_soon(protocol.connection_made, self)
@@ -296,7 +302,7 @@ class SerialTransport(asyncio.Transport):
 
     def _ensure_reader(self):
         if not self._has_reader and not self._closing:
-            if os.name == "nt" or self._serial.port.startswith("rfc2217"):
+            if not self._has_fileno:
                 self._has_reader = self._loop.call_later(self._poll_wait_time, self._poll_read)
             else:
                 self._loop.add_reader(self._serial.fileno(), self._read_ready)
@@ -304,7 +310,7 @@ class SerialTransport(asyncio.Transport):
 
     def _remove_reader(self):
         if self._has_reader:
-            if os.name == "nt" or self._serial.port.startswith("rfc2217"):
+            if not self._has_fileno:
                 self._has_reader.cancel()
             else:
                 self._loop.remove_reader(self._serial.fileno())
@@ -318,7 +324,7 @@ class SerialTransport(asyncio.Transport):
 
     def _ensure_writer(self):
         if not self._has_writer and not self._closing:
-            if os.name == "nt" or self._serial.port.startswith("rfc2217"):
+            if not self._has_fileno:
                 self._has_writer = self._loop.call_soon(self._poll_write)
             else:
                 self._loop.add_writer(self.serial.fileno(), self._write_ready)
@@ -326,7 +332,7 @@ class SerialTransport(asyncio.Transport):
 
     def _remove_writer(self):
         if self._has_writer:
-            if os.name == "nt" or self._serial.port.startswith("rfc2217"):
+            if not self._has_fileno:
                 self._has_writer.cancel()
             else:
                 self._loop.remove_writer(self._serial.fileno())
