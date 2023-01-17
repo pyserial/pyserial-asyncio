@@ -193,6 +193,14 @@ class SerialTransport(asyncio.Transport):
         """
         self._abort(None)
 
+    def get_protocol(self):
+        """Return the current protocol."""
+        return self._protocol
+
+    def set_protocol(self, protocol):
+        """Set a new protocol.""".
+        self._protocol = protocol
+
     def flush(self):
         """ clears output buffer and stops any more data being written
         """
