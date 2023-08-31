@@ -18,17 +18,18 @@ device connected, use:
 import os
 import unittest
 import asyncio
+from typing import Optional
 
 import serial_asyncio
 
-HOST = '127.0.0.1'
+HOST = "127.0.0.1"
 _PORT = 8888
 
 # on which port should the tests be performed:
-PORT = 'socket://%s:%s' % (HOST, _PORT)
+PORT = "socket://%s:%s" % (HOST, _PORT)
 
 
-@unittest.skipIf(os.name != 'posix', "asyncio not supported on platform")
+@unittest.skipIf(os.name != "posix", "asyncio not supported on platform")
 class Test_asyncio(unittest.TestCase):
     """Test asyncio related functionality"""
 
@@ -40,52 +41,54 @@ class Test_asyncio(unittest.TestCase):
         self.loop.close()
 
     def test_asyncio(self):
-        TEXT = b'Hello, World!\n'
+        TEXT = b"Hello, World!"
+        COUNT = 1024
+        COMPLETE_MESSAGE = TEXT * COUNT + b"\n"
         received = []
         actions = []
         done = asyncio.Event()
 
         class Input(asyncio.Protocol):
-
             def __init__(self):
                 super().__init__()
                 self._transport = None
 
-            def connection_made(self, transport):
+            def connection_made(self, transport: serial_asyncio.SerialTransport):
                 self._transport = transport
 
             def data_received(self, data):
                 self._transport.write(data)
 
         class Output(asyncio.Protocol):
-
             def __init__(self):
                 super().__init__()
-                self._transport = None
+                self._transport: Optional[serial_asyncio.SerialTransport] = None
 
-            def connection_made(self, transport):
+            def connection_made(self, transport: serial_asyncio.SerialTransport):
                 self._transport = transport
-                actions.append('open')
-                transport.write(TEXT)
+                actions.append("open")
+                for _ in range(COUNT):
+                    transport.write(TEXT)
+                transport.write(b"\n")
 
             def data_received(self, data):
                 received.append(data)
-                if b'\n' in data:
+                if b"\n" in data:
                     self._transport.close()
 
             def connection_lost(self, exc):
-                actions.append('close')
+                actions.append("close")
                 done.set()
 
             def pause_writing(self):
-                actions.append('pause')
+                actions.append("pause")
                 print(self._transport.get_write_buffer_size())
 
             def resume_writing(self):
-                actions.append('resume')
+                actions.append("resume")
                 print(self._transport.get_write_buffer_size())
 
-        if PORT.startswith('socket://'):
+        if PORT.startswith("socket://"):
             coro = self.loop.create_server(Input, HOST, _PORT)
             self.loop.run_until_complete(coro)
 
@@ -94,16 +97,20 @@ class Test_asyncio(unittest.TestCase):
         self.loop.run_until_complete(done.wait())
         pending = asyncio.all_tasks(self.loop)
         self.loop.run_until_complete(asyncio.gather(*pending))
-        self.assertEqual(b''.join(received), TEXT)
-        self.assertEqual(actions, ['open', 'close'])
+        for _ in range(1024):
+            self.loop.run_until_complete(asyncio.sleep(0))
+        all_data = b"".join(received)
+        self.assertEqual(all_data, COMPLETE_MESSAGE)
+        self.assertEqual(actions, ["open", "close"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
+
     sys.stdout.write(__doc__)
     if len(sys.argv) > 1:
         PORT = sys.argv[1]
     sys.stdout.write("Testing port: %r\n" % PORT)
-    sys.argv[1:] = ['-v']
+    sys.argv[1:] = ["-v"]
     # When this module is executed from the command-line, it runs all its tests
     unittest.main()
