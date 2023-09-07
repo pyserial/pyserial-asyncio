@@ -20,7 +20,7 @@ import unittest
 import asyncio
 from typing import Optional
 
-import serial_asyncio
+import serial_asyncio_fast
 
 HOST = "127.0.0.1"
 _PORT = 8888
@@ -53,7 +53,7 @@ class Test_asyncio(unittest.TestCase):
                 super().__init__()
                 self._transport = None
 
-            def connection_made(self, transport: serial_asyncio.SerialTransport):
+            def connection_made(self, transport: serial_asyncio_fast.SerialTransport):
                 self._transport = transport
 
             def data_received(self, data):
@@ -62,9 +62,9 @@ class Test_asyncio(unittest.TestCase):
         class Output(asyncio.Protocol):
             def __init__(self):
                 super().__init__()
-                self._transport: Optional[serial_asyncio.SerialTransport] = None
+                self._transport: Optional[serial_asyncio_fast.SerialTransport] = None
 
-            def connection_made(self, transport: serial_asyncio.SerialTransport):
+            def connection_made(self, transport: serial_asyncio_fast.SerialTransport):
                 self._transport = transport
                 actions.append("open")
                 for _ in range(COUNT):
@@ -92,7 +92,7 @@ class Test_asyncio(unittest.TestCase):
             coro = self.loop.create_server(Input, HOST, _PORT)
             self.loop.run_until_complete(coro)
 
-        client = serial_asyncio.create_serial_connection(self.loop, Output, PORT)
+        client = serial_asyncio_fast.create_serial_connection(self.loop, Output, PORT)
         self.loop.run_until_complete(client)
         self.loop.run_until_complete(done.wait())
         pending = asyncio.all_tasks(self.loop)

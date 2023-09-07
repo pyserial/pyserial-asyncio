@@ -19,18 +19,18 @@ instance. Transports are concerned with *how* bytes are transmitted through the 
 
 Protocols are a callback-based abstraction which determine *which* bytes are transmitted
 through an underlying transport. You can implement a subclass of :class:`asyncio.Protocol` which
-reads from, and/or writes to, a :class:`~serial_asyncio.SerialTransport`. When a serial connection
+reads from, and/or writes to, a :class:`~serial_asyncio_fast.SerialTransport`. When a serial connection
 is established your protocol will be handed a transport, to which your protocol
 implementation can write data as necessary. Incoming data and other serial connection lifecycle
 events cause callbacks on your protocol to be invoked, so it can take action as necessary.
 
-Usually, you will not create a :class:`~serial_asyncio.SerialTransport` directly. Rather, you will
+Usually, you will not create a :class:`~serial_asyncio_fast.SerialTransport` directly. Rather, you will
 define a ``Protocol`` class and pass that protocol to a function such as
-:func:`~serial_asyncio.create_serial_connection()` which will instantiate your ``Protocol`` and
-connect it to a :class:`~serial_asyncio.SerialTransport`.
+:func:`~serial_asyncio_fast.create_serial_connection()` which will instantiate your ``Protocol`` and
+connect it to a :class:`~serial_asyncio_fast.SerialTransport`.
 
 Streams are a coroutine-based alternative to callback-based protocols. This package provides a
-function :func:`~serial_asyncio.open_serial_connection` which returns :class:`asyncio.StreamReader`
+function :func:`~serial_asyncio_fast.open_serial_connection` which returns :class:`asyncio.StreamReader`
 and :class:`asyncio.StreamWriter` objects for interacting with underlying protocol and transport
 objects, which this library will create for you.
 
@@ -55,7 +55,7 @@ port asynchronously::
 
 
     import asyncio
-    import serial_asyncio
+    import serial_asyncio_fast
 
     class OutputProtocol(asyncio.Protocol):
         def connection_made(self, transport):
@@ -82,7 +82,7 @@ port asynchronously::
             print('resume writing')
 
     loop = asyncio.get_event_loop()
-    coro = serial_asyncio.create_serial_connection(loop, OutputProtocol, '/dev/ttyUSB0', baudrate=115200)
+    coro = serial_asyncio_fast.create_serial_connection(loop, OutputProtocol, '/dev/ttyUSB0', baudrate=115200)
     transport, protocol = loop.run_until_complete(coro)
     loop.run_forever()
     loop.close()
@@ -94,7 +94,7 @@ This example will read chunks from the serial port every 300ms::
 
 
     import asyncio
-    import serial_asyncio
+    import serial_asyncio_fast
     
     
     class InputChunkProtocol(asyncio.Protocol):
@@ -117,7 +117,7 @@ This example will read chunks from the serial port every 300ms::
         
     
     async def reader():
-        transport, protocol = await serial_asyncio.create_serial_connection(loop, InputChunkProtocol, '/dev/ttyUSB0', baudrate=115200)
+        transport, protocol = await serial_asyncio_fast.create_serial_connection(loop, InputChunkProtocol, '/dev/ttyUSB0', baudrate=115200)
     
         while True:
             await asyncio.sleep(0.3)

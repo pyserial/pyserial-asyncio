@@ -66,7 +66,7 @@ copyright = u'2015-2021, pySerial-team'
 # built documents.
 #
 # The short X.Y version.
-version = find_version(pathlib.Path(__file__).parent.parent / 'serial_asyncio' / '__init__.py')
+version = find_version(pathlib.Path(__file__).parent.parent / 'serial_asyncio_fast' / '__init__.py')
 # The full version, including alpha/beta/rc tags.
 release = version
 

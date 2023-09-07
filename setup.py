@@ -45,7 +45,7 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-version = find_version('serial_asyncio', '__init__.py')
+version = find_version('serial_asyncio_fast', '__init__.py')
 
 
 setup(
@@ -54,7 +54,7 @@ setup(
     version=version,
     author="pySerial-team",
     url="https://github.com/pyserial/pyserial-asyncio",
-    packages=['serial_asyncio'],
+    packages=['serial_asyncio_fast'],
     install_requires=[
         'pyserial',
     ],

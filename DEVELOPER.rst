@@ -5,7 +5,7 @@ Notes for developers
 Creating a release
 ==================
 
-- Ensure that the ``version`` in ``serial_asyncio/__init__.py`` is updated
+- Ensure that the ``version`` in ``serial_asyncio_fast/__init__.py`` is updated
   and in the form of major.minor[.patchlevel]
 - Ensure all changes, including version, is committed then create a tag with
   the same value as the version but prefixed with a ``v`` (e.g. "v0.5")

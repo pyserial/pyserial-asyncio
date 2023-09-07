@@ -2,7 +2,7 @@
  pySerial-asyncio API
 ======================
 
-.. module:: serial_asyncio
+.. module:: serial_asyncio_fast
 
 
 The following high-level functions are provided for initiating a serial connection:
@@ -32,11 +32,11 @@ The following high-level functions are provided for initiating a serial connecti
     1. ``protocol_factory`` is called without arguments and must return
        a :class:`asyncio.Protocol` subclass instance.
 
-    2. The protocol instance is tied to a :class:`~serial_asyncio.SerialTransport`.
+    2. The protocol instance is tied to a :class:`~serial_asyncio_fast.SerialTransport`.
 
     3. This coroutine returns successfully with a ``(transport, protocol)`` pair.
 
-    4. The :meth:`~serial_asyncio.SerialTransport.connection_made()` method of the protocol
+    4. The :meth:`~serial_asyncio_fast.SerialTransport.connection_made()` method of the protocol
        will be called at some point by the event loop.
 
 
@@ -65,11 +65,11 @@ The following high-level functions are provided for initiating a serial connecti
     1. ``protocol_factory`` is called without arguments and must return
        a :class:`asyncio.Protocol` subclass instance.
 
-    2. The protocol instance is tied to a :class:`~serial_asyncio.SerialTransport`.
+    2. The protocol instance is tied to a :class:`~serial_asyncio_fast.SerialTransport`.
 
     3. This coroutine returns successfully with a ``(transport, protocol)`` pair.
 
-    4. The :meth:`~serial_asyncio.SerialTransport.connection_made()` method of the protocol
+    4. The :meth:`~serial_asyncio_fast.SerialTransport.connection_made()` method of the protocol
        will be called at some point by the event loop.
 
 
