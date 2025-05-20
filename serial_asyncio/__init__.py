@@ -22,6 +22,9 @@ import urllib.parse
 import serial
 from functools import partial
 
+from typing import Callable, TypeVar
+_T = TypeVar('T')
+
 try:
     import termios
 except ImportError:
@@ -46,7 +49,7 @@ class SerialTransport(asyncio.Transport):
     calling you back when it succeeds.
     """
 
-    def __init__(self, loop, protocol, serial_instance):
+    def __init__(self, loop, protocol: asyncio.Protocol, serial_instance):
         super().__init__()
         self._loop = loop
         self._protocol = protocol
@@ -423,7 +426,7 @@ class SerialTransport(asyncio.Transport):
             self._loop = None
 
 
-async def create_serial_connection(loop, protocol_factory, url, *args, **kwargs):
+async def create_serial_connection(loop, protocol_factory: Callable[[], _T], url, *args, **kwargs) -> tuple[SerialTransport, _T]:
     """Create a connection to a new serial port instance.
 
     This function is a coroutine which will try to establish the
@@ -468,7 +471,7 @@ async def create_serial_connection(loop, protocol_factory, url, *args, **kwargs)
     return transport, protocol
 
 
-async def connection_for_serial(loop, protocol_factory, serial_instance):
+async def connection_for_serial(loop, protocol_factory: Callable[[], _T], serial_instance) -> tuple[SerialTransport, _T]:
     """Create a connection to the given serial port instance.
 
     This function is a coroutine which will try to establish the
