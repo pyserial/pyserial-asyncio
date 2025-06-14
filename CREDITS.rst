@@ -16,6 +16,7 @@ Contributors
 - Nicolas Di Pietro
 - jabdoa2
 - Chris Seymour
+- Yuval Mantin
 - ... not all names may be listed here, see also ``git log`` or online history_
 
 

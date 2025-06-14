@@ -21,13 +21,14 @@ import urllib.parse
 
 import serial
 from functools import partial
+import time
 
 try:
     import termios
 except ImportError:
     termios = None
 
-__version__ = '0.6'
+__version__ = '0.7'
 
 
 class SerialTransport(asyncio.Transport):
@@ -526,6 +527,29 @@ async def open_serial_connection(*,
     writer = asyncio.StreamWriter(transport, protocol, reader, loop)
     return reader, writer
 
+
+async def read_with_timeout(
+    reader: asyncio.StreamReader,
+    n: int,
+    timeout: float
+) -> bytes:
+    """A wrapper for the StreamReader.read method that adds a timeout support.
+    It returns the bytes read during the given timeout or until n bytes reached.
+
+    reader is a StreamReader item, n is the amount of bytes, timeout is the 
+    max time that the reading can take.
+
+    The idea is to read 1 byte with a timeout every time, until the timeout is 
+    reached or it read n bytes. In any case it returns what it had read.
+    """
+    start_t = time.time()
+    data = b''
+    while time.time() - start_t < timeout and len(data) < n:
+        try:
+            data += await asyncio.wait_for(reader.read(1), timeout=timeout)
+        except TimeoutError:
+            break
+    return data
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # test
