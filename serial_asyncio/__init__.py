@@ -130,6 +130,13 @@ class SerialTransport(asyncio.Transport):
         if self._closing:
             return
 
+        if not isinstance(data, (bytes, bytearray, memoryview)):
+            raise TypeError('data argument must be a bytes-like object')
+        if not data:
+            return
+        # The caller may reuse mutable buffers before the writer callback runs.
+        data = bytes(data)
+
         if self.get_write_buffer_size() == 0:
             self._write_buffer.append(data)
             self._ensure_writer()
